@@ -1,0 +1,116 @@
+# This is a sample Python script.
+
+# Press Shift+F10 to execute it or replace it with your code.
+# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+
+
+from PyQt5.QtWidgets import QApplication, QWidget
+import sys
+
+def print_hi(name):
+    # Use a breakpoint in the code line below to debug your script.
+    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+
+if __name__ == '__main__':
+    import sys
+    import json
+    from PyQt5.QtCore import Qt, QSize
+    from PyQt5.QtGui import QFont, QColor, QPalette
+    from PyQt5.QtWidgets import (
+        QApplication, QMainWindow, QWidget, QLabel, QVBoxLayout,
+        QHBoxLayout, QScrollArea, QFrame
+    )
+
+
+    class VolunteerCard(QFrame):
+        def __init__(self, event, color="#f5f5f5"):
+            super().__init__()
+            self.setStyleSheet(f"""
+                QFrame {{
+                    background-color: {color};
+                    border-radius: 15px;
+                    padding: 10px;
+                }}
+            """)
+            self.setFixedHeight(180)
+
+            layout = QVBoxLayout()
+
+            # Date/time/spots
+            info_layout = QHBoxLayout()
+            date_time = QLabel(f"<b>{event['date']}</b><br>{event['time']}")
+            date_time.setFont(QFont("Arial", 12))
+            spots = QLabel(f"<b>{event['spots']} Spots Left</b>")
+            spots.setFont(QFont("Arial", 12))
+
+            info_layout.addWidget(date_time)
+            info_layout.addStretch()
+            info_layout.addWidget(spots)
+
+            # Event title & org
+            title = QLabel(event['title'])
+            title.setFont(QFont("Arial", 14, QFont.Bold))
+            org = QLabel(event['org'])
+            org.setFont(QFont("Arial", 11))
+
+            layout.addLayout(info_layout)
+            layout.addSpacing(10)
+            layout.addWidget(title)
+            layout.addWidget(org)
+
+            self.setLayout(layout)
+
+
+    class MainWindow(QMainWindow):
+        def __init__(self):
+            super().__init__()
+            self.setWindowTitle("VolunTech")
+            self.setFixedSize(QSize(600, 800))
+
+            central_widget = QWidget()
+            self.setCentralWidget(central_widget)
+
+            main_layout = QVBoxLayout()
+
+            # Greeting
+            greeting = QLabel("Welcome User!")
+            greeting.setFont(QFont("Arial", 22, QFont.Bold))
+            greeting.setStyleSheet("color: #2E86C1;")
+            main_layout.addWidget(greeting)
+
+            # Subtitle
+            subtitle = QLabel("Volunteering options")
+            subtitle.setFont(QFont("Arial", 16))
+            subtitle.setStyleSheet("color: #1E8449; margin-bottom: 10px;")
+            main_layout.addWidget(subtitle)
+
+            # Scrollable area
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            scroll_content = QWidget()
+            scroll_layout = QVBoxLayout(scroll_content)
+
+            # Load events with alternating colors
+            try:
+                with open("events.json", "r") as file:
+                    events = json.load(file)
+                    colors = ["#FFF2CC", "#D5F5E3", "#F9EBEA", "#E8DAEF", "#D6EAF8"]
+                    for i, event in enumerate(events):
+                        color = colors[i % len(colors)]
+                        scroll_layout.addWidget(VolunteerCard(event, color=color))
+            except Exception as e:
+                scroll_layout.addWidget(QLabel("Error loading events: {str(e)}"))
+
+            scroll.setWidget(scroll_content)
+            main_layout.addWidget(scroll)
+
+            central_widget.setLayout(main_layout)
+
+
+    # Launch app
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    app.exec()
+
+# See PyCharm help at https://www.jetbrains.com/help/pycharm/
